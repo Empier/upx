@@ -601,6 +601,27 @@ off_t PackLinuxElf64::pack3(OutputFile *fo, Filter &ft)
                     fo->seek((j * sizeof(Elf64_Shdr)) + xct_off - asl_delta, SEEK_SET);
                     fo->rewrite(shdr, sizeof(*shdr));
                     fo->seek(0, SEEK_END);
+					
+					printf("%x %x %x %x\n", offset,xct_off,asl_delta, so_slide + offset);
+
+					upx_uint64_t start_o = offset;
+					printf("%x \n", start_o);
+
+					for (int i = 0x158; i < 0x200; i = i + 4)
+					{
+						upx_uint64_t find_o = get_te64(&file_image[start_o + i]);
+						if (find_o == 7)
+						{
+							find_o = get_te64(&file_image[start_o + i +0x20]);
+							printf("%x \n", find_o);
+
+							fo->seek(find_o + 0x10, SEEK_SET);
+							fo->rewrite(&word, sizeof(word));
+							fo->seek(0, SEEK_END);
+							break;
+						}
+					}
+					
                 }
                 if (Elf64_Shdr::SHT_RELA == sh_type
                 &&  n_jmp_slot
